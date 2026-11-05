@@ -18,9 +18,10 @@ suppressPackageStartupMessages({
   args0 <- commandArgs(trailingOnly = FALSE)
   here <- dirname(sub("^--file=", "", args0[grep("^--file=", args0)]))
   if (!length(here) || !nzchar(here)) here <- "."
-  source(file.path(here, "../dada2/dada2_common.R"))
+  source(file.path(here, "./dada2_common.R"))
 })
 
+## IMPORTANT: Filtering Settings
 args <- parse_args(list(
   in_dir = NULL, out_dir = NULL, mode = "paired", pattern = "",
   maxEE = "c(2,5)", truncQ = "2", maxN = "50", minLen = "100", maxLen = "Inf",

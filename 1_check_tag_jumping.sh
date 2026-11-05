@@ -1,22 +1,27 @@
 #!/bin/bash
 ######################################################################################################################################
-### *must be run within 1_demult directory                                                                                         ###
+### *must be run from within run directory, which must contain:                                                                    ###
+###         0_raw : directory containing raw fastq.gz files                                                                        ###
+###         barcodes : barcodes directory containing TSV files in 11-field format                                                  ###
 ### USAGE: 1_check_tag_jumping.sh <type> <lib> <threads>                                                                           ###
 ###          type : MF or PF                                                                                                       ###
 ###          lib : 01-44                                                                                                           ###
 ###          threads : number of threads                                                                                           ###
 ### type & lib are used to locate the library directory& barcodes  (specific to ESFI project)                                      ###
 ### OUTPUTS: ESFI_PF_P01/trimmed_R1_ESVs.fasta = exact sequence variants for R1 files                                              ###
-###          demultiplexing_read_category_ESFI${type}P${lib}.tsv = reads per demultiplexing category for each 
-###          ESFI${type}P${lib}_reads.tsv = 
-###          ESFI${type}P${lib}_R1_cutadapt.fastq
-###          ESFI${type}P${lib}_R1_ASVs_mapped.txt
+###          demultiplexing_read_category_ESFI${type}P${lib}.tsv = assignment of each read to a demultiplexing category            ###
+###          ESFI${type}P${lib}_reads.tsv =  lines per demultiplexed file (based on barcodes only)                                 ###
+###          ESFI${type}P${lib}_R1_cutadapt.fastq.gz = concatenated reads into single file,                                        ###
+###                                                         with demultiplexed fate added to read header                           ###
+###          ESFI${type}P${lib}_R1_ASVs_mapped.txt = mapping of raw R1 reads against most abundant 100 ASVs                        ###
 ######################################################################################################################################
 type=$1
 lib=$2
 threads=$3
 
-cd ESFI_${type}_P${lib}
+OUTDIR=1_demult/ESFI_${type}_P${lib}
+if [[ ! -d ${OUTDIR} ]]; then mkdir ${OUTDIR}; fi
+cd ${OUTDIR}
 
 LIB_INDEX="$(awk '{print $3}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv | head -n1)" 
 
@@ -25,8 +30,8 @@ awk '{print ">"$2"\nNNN"$5}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv > i5
 
 
 # run cutadapt for anchored unique barcodes with 0 errors, min length 110 (primers=40 bp, insert=70 bp)
-mkdir cutadapt
-cutadapt -e 0 --no-indels --minimum-length 110 -g file:i5_barcodes.fa -G file:i5_barcodes.fa -o cutadapt/{name1}-{name2}_R1.fastq -p cutadapt/{name1}-{name2}_R2.fastq \
+if [[ ! -d cutadapt ]]; then mkdir cutadapt; fi
+cutadapt -e 0 --no-indels --overlap 8 --minimum-length 110 -g file:i5_barcodes.fa -G file:i5_barcodes.fa -o cutadapt/{name1}-{name2}_R1.fastq -p cutadapt/{name1}-{name2}_R2.fastq \
 ../../0_raw/*${LIB_INDEX}*_R1_001.fastq.gz ../../0_raw/*${LIB_INDEX}*_R2_001.fastq.gz -j ${threads}
 
 # grab word counts to check tag jumping (check in R)

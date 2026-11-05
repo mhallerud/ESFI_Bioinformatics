@@ -31,14 +31,16 @@ suppressPackageStartupMessages({
   args0 <- commandArgs(trailingOnly = FALSE)
   here <- dirname(sub("^--file=", "", args0[grep("^--file=", args0)]))
   if (!length(here) || !nzchar(here)) here <- "."
-  source(file.path(here, "../dada2/dada2_common.R"))
+  source(file.path(here, "./dada2_common.R"))
 })
 
+## IMPORTANT: Filtering Settings
+# omega-a = p-value threshold used to split seqs, based on abundance of each seq relative to expected
 args <- parse_args(list(
   in_dir = NULL, out_dir = NULL, mode = "single", pattern = "",
   err = "", fasta_dir = "", no_fasta = "FALSE",
   pool = "pseudo", omega_a = "1e-40", threads = "8",
-  minOverlap = "10", maxMismatch = "0",
+  minOverlap = "50", maxMismatch = "20",
   chimera = "consensus", errfun = "binned", nbases = "1e8",
   filter_stats = "", min_reads = "1"
 ))
@@ -117,7 +119,7 @@ if (mode == "paired") {
   ddR <- dada(filtRs, err = errR, pool = pool, multithread = threads,
               OMEGA_A = omegaA, verbose = FALSE)
   if (length(filtRs) == 1L) ddR <- list(ddR); names(ddR) <- names(filtRs)
-
+  
   msg("mergePairs(minOverlap=", args$minOverlap, ", maxMismatch=",
       args$maxMismatch, ")")
   mergers <- mergePairs(ddF, filtFs, ddR, filtRs,
@@ -144,9 +146,9 @@ if (ncol(seqtab) == 0L) {
   if (nzchar(args$fasta_dir)) {
     for (sid in unique(c(sample_id_of(filtFs), sample_id_of(dropped)))) {
       lb <- lib_of(sid)
-      dir.create(file.path(args$fasta_dir, paste0("LIB_", lb)),
+      dir.create(file.path(args$out_dir, paste0("LIB_", lb)),
                  recursive = TRUE, showWarnings = FALSE)
-      file.create(file.path(args$fasta_dir, paste0("LIB_", lb),
+      file.create(file.path(args$out_dir, #paste0("LIB_", lb),
                             paste0(sid, ".clust.fasta")))
     }
   }
@@ -165,8 +167,8 @@ if (identical(args$chimera, "none")) {
 }
 
 ## ---------------------------------------------------------------- outputs
-saveRDS(seqtab,    file.path(args$out_dir, "seqtab.rds"))
-saveRDS(seqtab_nc, file.path(args$out_dir, "seqtab_nochim.rds"))
+#saveRDS(seqtab,    file.path(args$out_dir, "seqtab.rds"))
+#saveRDS(seqtab_nc, file.path(args$out_dir, "seqtab_nochim.rds"))
 
 asv_names <- paste0("ASV_", seq_len(ncol(seqtab_nc)))
 writeLines(as.vector(rbind(paste0(">", asv_names), colnames(seqtab_nc))),
