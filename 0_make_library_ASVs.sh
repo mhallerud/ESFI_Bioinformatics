@@ -27,15 +27,15 @@ cutadapt -e 0.15 --overlap 20 --no-indels --revcomp -g CCHGAYATRGCHTTYCCHCG -G T
 
 # dereplicate- check these long reads that are passing
 seqtk seq primers_trimmed_R1.fastq.gz -A > primers_trimmed_R1.fasta
-vsearch --fastx_filter primers_trimmed_R1.fasta --minseqlength 200 --output primers_trimmed_R1_long.fasta
-vsearch --derep_fulllength primers_trimmed_R1_long.fasta --output trimmed_long_ESVs.fasta --sizeout --relabel esv --minuniquesize 100 --threads ${threads}
+#vsearch --fastx_filter primers_trimmed_R1.fasta --minseqlength 200 --output primers_trimmed_R1_long.fasta
+vsearch --derep_fulllength primers_trimmed_R1_long.fasta --minseqlength 200 --output trimmed_long_ESVs.fasta --sizeout --relabel esv --minuniquesize 100 --threads ${threads}
 
 # now do the same with first 1 million reads to check short reads
-vsearch --fastx_filter primers_trimmed_R1.fasta --maxseqlength 200 --output primers_trimmed_R1_short.fasta
-vsearch --derep_fulllength primers_trimmed_R1_short.fasta --output trimmed_short_ESVs.fasta --sizeout --relabel esv --minuniquesize 100 --threads ${threads}
+#vsearch --fastx_filter primers_trimmed_R1.fasta --maxseqlength 200 --output primers_trimmed_R1_short.fasta
+vsearch --derep_fulllength primers_trimmed_R1_short.fasta --maxseqlength 200 --output trimmed_short_ESVs.fasta --sizeout --relabel esv --minuniquesize 100 --threads ${threads}
 
 
 # clean up
 rm primers_trimmed*fasta -f
-rm primers_trimmed*fastq.gz -f
+#rm primers_trimmed*fastq.gz -f
 
