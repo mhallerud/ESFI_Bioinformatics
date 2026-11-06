@@ -22,7 +22,7 @@ if [[ ! -d ${OUTDIR} ]]; then mkdir ${OUTDIR} -p; fi
 cd ${OUTDIR}
 
 # trim primers (min length 200)
-cutadapt -e 0.15 --overlap 20 --no-indels --revcomp -g CCHGAYATRGCHTTYCCHCG -G TCDGGRTGNCCRAARAAYCA -a CTGTCTCTTATACACATCT -A CTGTCTCTTATACACATCT -o primers_trimmed_R1.fastq.gz -p primers_trimmed_R2.fastq.gz \
+cutadapt -e 0.15 --overlap 20 --no-indels --revcomp -g CCHGAYATRGCHTTYCCHCG -G TCDGGRTGNCCRAARAAYCA -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o primers_trimmed_R1.fastq.gz -p primers_trimmed_R2.fastq.gz \
 ../../0_raw/*${LIB_INDEX}*R1_001.fastq.gz ../../0_raw/*${LIB_INDEX}*R2_001.fastq.gz -j ${threads}
 
 # dereplicate- check these long reads that are passing
@@ -35,5 +35,5 @@ vsearch --derep_fulllength primers_trimmed_R1.fasta --maxseqlength 200 --output 
 
 # clean up
 rm primers_trimmed*fasta -f
-#rm primers_trimmed*fastq.gz -f
+rm primers_trimmed*fastq.gz -f
 
