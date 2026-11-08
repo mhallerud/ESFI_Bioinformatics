@@ -15,7 +15,7 @@ type=$1
 lib=$2
 threads=$3
 
-LIB_INDEX="$(awk '{print $3}' barcodes/ESFI${type}P${lib}_barcodes.tsv | head -n1)"
+LIB_INDEX="$(awk '{print $4}' barcodes/ESFI${type}P${lib}_barcodes.tsv | head -n1)"
 
 OUTDIR=1_demult/ESFI_${type}_P${lib}
 if [[ ! -d ${OUTDIR} ]]; then mkdir ${OUTDIR} -p; fi
@@ -23,7 +23,7 @@ cd ${OUTDIR}
 
 # trim primers (min length 200)
 cutadapt -e 0.15 --overlap 20 --no-indels --revcomp -g CCHGAYATRGCHTTYCCHCG -G TCDGGRTGNCCRAARAAYCA -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT -o primers_trimmed_R1.fastq.gz -p primers_trimmed_R2.fastq.gz \
-../../0_raw/*${LIB_INDEX}*R1_001.fastq.gz ../../0_raw/*${LIB_INDEX}*R2_001.fastq.gz -j ${threads}
+../../0_raw/*-${LIB_INDEX}_*R1_001.fastq.gz ../../0_raw/*-${LIB_INDEX}_*R2_001.fastq.gz -j ${threads}
 
 # dereplicate- check these long reads that are passing
 seqtk seq primers_trimmed_R1.fastq.gz -A > primers_trimmed_R1.fasta

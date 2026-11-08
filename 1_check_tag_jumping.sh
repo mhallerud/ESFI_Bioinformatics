@@ -23,16 +23,15 @@ OUTDIR=1_demult/ESFI_${type}_P${lib}
 if [[ ! -d ${OUTDIR} ]]; then mkdir ${OUTDIR}; fi
 cd ${OUTDIR}
 
-LIB_INDEX="$(awk '{print $3}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv | head -n1)" 
+LIB_INDEX="$(awk '{print $4}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv | head -n1)" 
 
 # set up barcode only files, account for anchoring of all NNN${barcode} options 
-awk '{print ">"$2"\nNNN"$5}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv > i5_barcodes.fa
-
+awk '{print ">"$2"\n^NNN"$5}' ../../barcodes/ESFI${type}P${lib}_barcodes.tsv > i5_barcodes.fa
 
 # run cutadapt for anchored unique barcodes with 0 errors, min length 110 (primers=40 bp, insert=70 bp)
 if [[ ! -d cutadapt ]]; then mkdir cutadapt; fi
-cutadapt -e 0 --no-indels --overlap 8 --minimum-length 110 -g file:i5_barcodes.fa -G file:i5_barcodes.fa -o cutadapt/{name1}-{name2}_R1.fastq -p cutadapt/{name1}-{name2}_R2.fastq \
-../../0_raw/*${LIB_INDEX}*_R1_001.fastq.gz ../../0_raw/*${LIB_INDEX}*_R2_001.fastq.gz -j ${threads}
+cutadapt -e 0 --no-indels --overlap 8 --minimum-length 70 -g file:i5_barcodes.fa -G file:i5_barcodes.fa -o cutadapt/{name1}-{name2}_R1.fastq -p cutadapt/{name1}-{name2}_R2.fastq \
+../../0_raw/*-${LIB_INDEX}_*_R1_001.fastq.gz ../../0_raw/*-${LIB_INDEX}_*_R2_001.fastq.gz -j ${threads}
 
 # grab word counts to check tag jumping (check in R)
 wc -l cutadapt/*R1.fastq > ESFI${type}P${lib}_reads.tsv
@@ -61,7 +60,7 @@ for f in `ls -1 cutadapt/*R1.fastq`; do
 done
 
 # map against top 100 most abundant R1 ASVs in library
-head -n 200 trimmed_R1_ESVs.fasta > trimmed_R1_ESVs_top100.fasta
+head -n 200 trimmed_long_ESVs.fasta > trimmed_R1_ESVs_top100.fasta
 vsearch --usearch_global ESFI${type}P${lib}_R1_cutadapt.fastq --db trimmed_R1_ESVs_top100.fasta --id 0.97 --otutabout ESFI${type}P${lib}_R1_ASVs_mapped.txt
 #makeblastdb -in trimmed_R1_ESVs_top100.fasta -dbtype nucl
 #seqtk seq -A ../0_raw/*${LIB_INDEX}*_R1_001.fastq.gz > raw_R1.fa
