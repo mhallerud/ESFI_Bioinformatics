@@ -45,11 +45,16 @@ vsearch --derep_fulllength ${OUT}_filt.fasta --output ${OUT}_uniques.fasta --siz
 # consout : output of consensus sequences
 # alnout : output of (human-readable) alignments
 echo "DENOISING " ${LIB} "............"
+rm ${OUT}_ESVs* -f
 vsearch --cluster_unoise ${OUT}_uniques.fasta --minsize 10 --unoise_alpha 2 --sizein --sizeout --clusterout_sort --relabel esv \
 --centroids ${OUT}_ESVs.fasta --msaout ${OUT}_ESVs.msa --consout ${OUT}_ESVs_consensus.fa --alnout ${OUT}_ESVs.aln --threads ${THREADS}
 
+# Length filtering
+# keep 6-codon difference from expected amplicon
+vsearch --fastx_filter ${OUT}_ESVs.fasta --fastq_minlen 400 --fastq_maxlen 436 --fastaout ${OUT}_ESVs_400to436bp.fasta
+
 # map these back to samples to create current seqtab
-vsearch --search_exact ${OUT}_uniques.fasta --db ${OUT}_ESVs.fasta --otutabout ${OUT}_ESVs_mapped.txt --threads ${THREADS}
+vsearch --search_exact ${OUT}_filt.fasta --db ${OUT}_ESVs_400to436bp.fasta --otutabout ${OUT}_ESVs_mapped.txt --threads ${THREADS}
 
 # Chimera filtering with UCHIME2
 # key parameters:
@@ -61,5 +66,5 @@ vsearch --search_exact ${OUT}_uniques.fasta --db ${OUT}_ESVs.fasta --otutabout $
 
 # dada2 is better because it accounts for 'consensus' chimera identity across samples...
 echo "RUNNING CHIMERA FILTERING FOR " ${LIB} "............"
-/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/dada2_chimeraRemoval.R ${OUT}_ESVs_mapped.txt ${OUT}_ESVs.fasta ${OUT} ${THREADS}
+/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/dada2_chimeraRemoval.R ${OUT}_ESVs_mapped.txt ${OUT}_ESVs_400to436bp.fasta ${OUT} ${THREADS}
 

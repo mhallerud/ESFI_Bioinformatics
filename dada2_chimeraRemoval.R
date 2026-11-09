@@ -32,6 +32,6 @@ write.csv(seqtab.nochim, paste0(OUT,"_ASVs.csv"))
 # export sequences
 outseqs <- colnames(seqtab.nochim)
 outnames <- seqs$Name[match(outseqs, seqs$Sequence)]
-outsizes <- paste0("size=", colSums(seqtab))
+outsizes <- paste0("size=", colSums(seqtab.nochim))
 outnamesfull <- paste(paste(OUT, outnames, sep="_"), outsizes, sep=";")
 LocaTT::write.fasta(outnamesfull, outseqs, paste0(OUT, "_ASVs.fasta"))
