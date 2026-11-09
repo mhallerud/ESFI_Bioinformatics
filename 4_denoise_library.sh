@@ -9,9 +9,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # set filepaths / names
 OUT="$(echo ${LIB} | sed 's/_//g')"
-peardir=2_paired/${LIB}/pear
+if [[ ! -d 3_clustering ]]; then mkdir 3_clustering; fi
 
 # clean up extra pear outputs
+peardir=2_paired/${LIB}/pear
 if [[ ! -d ${peardir} ]]; then mkdir ${peardir} -p; fi
 mv 2_paired/${LIB}/*unassembled*fastq ${peardir}
 mv 2_paired/${LIB}/*discarded*fastq ${peardir}
@@ -21,7 +22,7 @@ echo "MAKING FASTQ FILES FOR " ${LIB} "............"
 cd 2_paired/${LIB}
 rm ../../3_clustering/${OUT}_full.fastq -f
 for f in `ls -1 *assembled.fastq`; do
-	sed -e "s|\(^@VH.*\) .*$|\1;sample=${f%.*};|g" $f | sed 's/.assembled//g'| sed 's|2_paired/||g' >> ../../3_clustering/${OUT}_full.fastq
+	sed -e "s|\(^@VH.*\) .*$|\1;sample=${f%.*};|g" $f | sed 's/ rc//g' | sed 's/.assembled//g'| sed 's|2_paired/||g' >> ../../3_clustering/${OUT}_full.fastq
 done
 
 cd ../../3_clustering

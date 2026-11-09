@@ -26,8 +26,8 @@ seqtab <- seqtab[,-1]
 seqtab <- t(seqtab)
 
 # remove chimeras
-seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = THREADS, verbose = FALSE)
-write.csv(seqtab.nochim, paste0(OUT,"_ASVs.csv"))
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = FALSE)
+write.csv(seqtab.nochim, paste0(OUT,"_ASVs_mapped.csv"))
 
 # export sequences
 outseqs <- colnames(seqtab.nochim)
