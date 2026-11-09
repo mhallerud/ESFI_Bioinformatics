@@ -6,11 +6,12 @@ Bulk arthropod samples were collected using malaise traps, pitfall traps, and bl
 0. Initial assessment of library quality:
    A) Assemble counts of amplicon sequence variants of all sequences containing primers within each library.
    B) Quantify tag-jumping and mis-assignment rates for reads within each tag combination, per library.
-1. Demultiplex samples, requiring both barcodes and primers to be present, and allowing for 1 bp error.
-2. Run quality filtering, denoising, and chimera removal to create amplicon sequence variants (ASVs) per library.
-3. Cluster library-level ASVs into molecular operational taxonomic units (mOTUs) at a 97% similarity threshold.
-4. Assign taxonomy to each OTU using the Barcode of Life (BOLD) & NCBI reference databases.
-5. Post-filtering of sequences to remove chimeras, NUMTs, off-target, and poorly assigned sequences.
+1. Demultiplex samples, requiring both barcodes and primers to be present, with no errors allowed.
+2. Merge paired-end sequences.
+3. Run quality filtering, denoising, length filtering, and chimera removal to create amplicon sequence variants (ASVs) per library.
+4. Merge ASVs across libraries and cluster into project-level molecular operational taxonomic units (mOTUs) at a 97% similarity threshold.
+5. Assign taxonomy to each OTU using the Barcode of Life (BOLD) & NCBI reference databases.
+6. Post-filtering of sequences to remove chimeras, NUMTs, off-target, and poorly assigned sequences.
 
 ## Pipeline setup
 The pipeline depends on the run directory being set up as follows:
@@ -36,23 +37,24 @@ The pipeline depends on the run directory being set up as follows:
 # usage: 2_prep_cutadapt.sh <type> <lib#>
 2_prep_cutadapt.sh PF 01
 ```
-2. Quality filtering and trimming using dada2.
+2. Merging read pairs using PEAR.
 ```
 #!/bin/bash
-# usage: /local/cqls/R/R-4.4.2/Rscript 3_dada2_filter.R --in-dir 1_demult/${LIB}/demux --out-dir 2_denoise/${LIB}/filtered
-/local/cqls/R/R-4.4.2/Rscript 3_dada2_filter.R --in-dir 1_demult/ESFI_PF_P01/demux --out-dir 2_denoise/ESFI_PF_P01/filtered
+# usage: 3_prep_pear <type> <lib>
+3_prep_pear.sh PF 01
 ```
-3. Denoising and chimera removal using dada2.
+3. Denoising and filtering using vsearch, and chimera removal using dada2.
 ```
-#!/bin/bash
-# usage: /local/cqls/R/R-4.4.2/Rscript 4_dada2_denoise.R --in-dir 2_denoise/${LIB}/filtered --out-dir 2_denoise/${LIB}
-/local/cqls/R/R-4.4.2/Rscript 4_dada2_denoise.R --in-dir 2_denoise/ESFI_PF_P01/filtered --out-dir 2_denoise/ESFI_PF_P01
+#!/bin/bash (requires R path to be set within script)
+# usage: 4_denoise_library.sh <lib> <threads>
+4_denoise_library.sh ESFI_PF_P01 10
 ```
 4. OTU clustering across the run using vsearch.
+Make sure to increase memory allocation for this step!
 ```
 #!/bin/bash
-# usage: 5_run_vsearch.sh ...
-5_run_vsearch.sh ...
+# usage: 5_run_vsearch.sh <run> <threads>
+5_run_vsearch.sh NextSeq676 10
 ```
 5. Merging OTUs across runs via dada2.
 6. Taxonomic assignment with blast & dada2.
@@ -62,7 +64,7 @@ The pipeline depends on the run directory being set up as follows:
 Note: For each of these, commands can be written to a file and submitted as a job to enable multi-threading, e.g.:
 ```
 #!/bin/bash
-for p in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18; do
+for p in {01..18}; do
 	2_prep_cutadapt.txt PF ${p}
 done > cutadapt_commands.txt
 
