@@ -6,9 +6,9 @@ TSV <- args[1]
 # read in & reformat read count info
 reads <- read.csv(TSV, header=FALSE)
 reads$V1 <- trimws(reads$V1)
-reads <- reads[!grepl("total", reads$V1),]
 reads[,c("Reads","File")] <- stringr::str_split(reads$V1, " ", 2, TRUE)
 reads[,c("Sample1","Sample2")] <- stringr::str_split(gsub("_R1.fastq","",reads$File),"-",2,TRUE)
+reads <- reads[!endsWith(reads$V1, "total"),]
 reads$Reads <- as.numeric(reads$Reads)
 
 # classify read type

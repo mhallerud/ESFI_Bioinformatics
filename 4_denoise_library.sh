@@ -1,10 +1,11 @@
 #!/bin/bash
+## Must be run from within Run directory
+
 LIB=$1
 THREADS=$2
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-cd ${LIB}
 
 # set filepaths / names
 OUT="$(echo ${LIB} | sed 's/_//g')"
@@ -18,6 +19,7 @@ mv 2_paired/${LIB}/*discarded*fastq ${peardir}
 # concatenate reads into single FASTQ per library- sampleID is appended to each read header
 echo "MAKING FASTQ FILES FOR " ${LIB} "............"
 cd 2_paired/${LIB}
+rm ../../3_clustering/${OUT}_full.fastq -f
 for f in `ls -1 *assembled.fastq`; do
 	sed -e "s|\(^@VH.*\) .*$|\1;sample=${f%.*};|g" $f | sed 's/.assembled//g'| sed 's|2_paired/||g' >> ../../3_clustering/${OUT}_full.fastq
 done
@@ -47,7 +49,7 @@ vsearch --cluster_unoise ${OUT}_uniques.fasta --minsize 10 --unoise_alpha 2 --si
 --centroids ${OUT}_ESVs.fasta --msaout ${OUT}_ESVs.msa --consout ${OUT}_ESVs_consensus.fa --alnout ${OUT}_ESVs.aln --threads ${THREADS}
 
 # map these back to samples to create current seqtab
-vsearch --search_exact ${LIB}.fasta --db ${OUT}_ESVs.fasta --otutabout ${OUT}_ESVs_mapped.txt --threads ${THREADS}
+vsearch --search_exact ${OUT}_uniques.fasta --db ${OUT}_ESVs.fasta --otutabout ${OUT}_ESVs_mapped.txt --threads ${THREADS}
 
 # Chimera filtering with UCHIME2
 # key parameters:
@@ -59,5 +61,5 @@ vsearch --search_exact ${LIB}.fasta --db ${OUT}_ESVs.fasta --otutabout ${OUT}_ES
 
 # dada2 is better because it accounts for 'consensus' chimera identity across samples...
 echo "RUNNING CHIMERA FILTERING FOR " ${LIB} "............"
-/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/dada2_chimeraRemoval.R ${OUT}_ESVs_mapped.txt ${OUT}_ESVs_denoised.fasta ${OUT} ${THREADS}
+/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/dada2_chimeraRemoval.R ${OUT}_ESVs_mapped.txt ${OUT}_ESVs.fasta ${OUT} ${THREADS}
 
