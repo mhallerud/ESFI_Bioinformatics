@@ -198,7 +198,9 @@ run_summary_plots <- function(run){
 
 
 args <- commandArgs(trailingOnly = TRUE)
-run_summary_plots(args[1])
+run <- args[1]
+
+run_summary_plots(run)
 
 # zip folder for easier download
 system(paste("zip -r ",file.path(run,"1_demult/plots.zip"), file.path(run, "1_demult/plots")))
