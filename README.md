@@ -56,10 +56,23 @@ Make sure to increase memory allocation for this step!
 # usage: 5_run_vsearch.sh <run> <threads>
 5_run_vsearch.sh NextSeq676 10
 ```
-5. Merging OTUs across runs via dada2.
+5. Merging OTUs across runs.
+```
+# merge across runs (not the most elegant merge method but it works)
+cat NextSeq*/3_clustering/ESFI*_OTUs.fasta > MERGED_OTUs.fasta
+# re-cluster 
+vsearch --cluster_size MERGED_OTUs.fasta --id 0.97 --centroids MERGED_97_OTUs.fasta --sizein --sizeout --uc MERGED_97_OTUs.uc --aln MERGED_97_OTUs.aln --msa MERGED_97_OTUs.msa
+```
 6. Taxonomic assignment with blast & dada2.
+NOTE: dada2 requires a large memory allocation to run because it is not parallelized!
+```
+# run BLAST assignment
+6_BLAST_assignment.sh MERGED_97 <threads>
+# run dada2 assignment- exports confidence scores
+/local/cqls/R/R-4.4.2/Rscript 6_dada2_taxonAssign.R MERGED_97_OTUs.fasta MERGED_97_OTUs_BOLD_dada2Assign.csv
+```
 7. Additional chimera filtering with LULU.
-
+....
 
 Note: For each of these, commands can be written to a file and submitted as a job to enable multi-threading, e.g.:
 ```

@@ -1,4 +1,7 @@
 library(dada2)
+library(here)
+script_path=here::here()
+
 
 # set input variables
 ## USAGE: Rscript 6_run_dada2_assign.R infile prefix [type]
@@ -12,6 +15,7 @@ currdir=getwd()
 #setwd(file.path(currdir, path.cut))
 
 # set up sequence data
+print("Reading in data...........")
 if(type=="SEQTAB"){
 	SEQTAB=INFILE
 	seqs <- readRDS(SEQTAB)
@@ -23,7 +27,8 @@ if(type=="SEQTAB"){
 
 
 # taxonomic assignment
+print("Starting taxonomic assignment....")
 set.seed(100)
-taxa <- assignTaxonomy(seqs, "BOLD/BOLD_Public.04-Apr-2025.dada2.fasta", 
-                       minBoot=50, outputBootstraps=TRUE)
+taxa <- assignTaxonomy(seqs, file.path(script_path, "../BOLD/BOLD_Public.04-Apr-2025.dada2.fasta"), 
+                       minBoot=50, outputBootstraps=TRUE, multithread=TRUE)
 write.csv(taxa, paste0(PREFIX, "_taxa.csv"))

@@ -22,7 +22,7 @@ echo "MAKING FASTQ FILES FOR " ${LIB} "............"
 cd 2_paired/${LIB}
 rm ../../3_clustering/${OUT}_full.fastq -f
 for f in `ls -1 *assembled.fastq`; do
-	sed -e "s|\(^@VH.*\) .*$|\1;sample=${f%.*};|g" $f | sed 's/ rc//g' | sed 's/.assembled//g'| sed 's|2_paired/||g' >> ../../3_clustering/${OUT}_full.fastq
+        sed -e "s|^\(@VH[^ ]*\) .*$|\1;sample=${f%.*};|" $f | sed 's/.assembled//g'| sed 's|2_paired/||g' >> ../../3_clustering/${OUT}_full.fastq
 done
 
 cd ../../3_clustering
@@ -65,7 +65,4 @@ vsearch --search_exact ${OUT}_filt.fasta --db ${OUT}_ESVs_400to436bp.fasta --otu
 #vsearch --uchime3_denovo ${OUT}_ESVs.fasta --sizein --fasta_score --sizeout --relabel ASV_${OUT} --nonchimeras ${OUT}_ASVs.fasta \
 #--chimeras ${OUT}_chimeras.fasta --uchimealns ${OUT}_chimeras.aln --uchimeout ${OUT}_uchime.tsv
 
-# dada2 is better because it accounts for 'consensus' chimera identity across samples...
-echo "RUNNING CHIMERA FILTERING FOR " ${LIB} "............"
-/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/dada2_chimeraRemoval.R ${OUT}_ESVs_mapped.txt ${OUT}_ESVs_400to436bp.fasta ${OUT} ${THREADS}
-
+# We'll do chimera filtering at the run level with dada2 instead

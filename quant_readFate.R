@@ -23,4 +23,7 @@ reads$Type[reads$Sample1=="unknown" & reads$Sample2=="unknown"] <- "BOTH_missing
 # tabulate
 tbl <- aggregate(Reads~Type, reads, FUN=sum)
 tbl$Prop <- tbl$Reads/sum(reads$Reads)
+tbl <- rbind(tbl, c("Sum_Missing", 
+	sum(tbl$Reads[tbl$Type%in%c("FWD_missing","REV_missing","BOTH_missing")]), 
+	sum(tbl$Prop[tbl$Type%in%c("FWD_missing","REV_missing","BOTH_missing")])))
 tbl

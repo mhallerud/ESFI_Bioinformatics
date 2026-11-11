@@ -1,5 +1,5 @@
 ### USAGE: Rscript run_lulu.R otutab alignfile outfile
-# assumes otutab is in Vsearch output format
+# assumes otutab is in dada2 output format
 
 
 library(data.table)
@@ -18,9 +18,10 @@ main <- function(){
 	
 	# read in OTU table, reformat
 	seqtab <- read.csv(otufile)
-	otutab <- t(seqtab[,-1])
-	rownames(otutab) <- paste0("otu",1:nrow(otutab))
-	colnames(otutab) <- seqtab$V1
+	#otutab <- t(seqtab[,-1])
+	rownames(otutab) <- otutab[,1] #paste0("otu",1:nrow(otutab))
+	otutab <- otutab[,-1]
+	#colnames(otutab) <- seqtab$V1
 
 	#otutab <- otutab[,-1]
 	#otutab <- otutab[,-ncol(otutab)]
