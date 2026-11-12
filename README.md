@@ -55,6 +55,11 @@ Make sure to increase memory allocation for this step!
 #!/bin/bash
 # usage: 5_run_vsearch.sh <run> <threads>
 5_run_vsearch.sh NextSeq676 10
+# mapping is slow- this will output library-level commands under ${RUN}/3_clustering/run_mapping.txt
+# that can be submitted for parallel processing
+# once mapping is complete, merge OTUtabs across libraries:
+/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/merge_otutabs.R ${RUN}
+# this will create a run-level OTU table with PCR reps in columns, 97% OTUs in rows
 ```
 5. Merging OTUs across runs.
 ```

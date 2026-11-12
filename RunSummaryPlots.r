@@ -13,6 +13,7 @@ run_summary_plots <- function(run){
   for (dir in dirs){
     name <- gsub("_","",basename(dir))
     # read in TSV
+    print(paste0("Reading in ", name,"_reads.tsv"))
     tsv <- read.table(file.path(dir, paste0(name,"_reads.tsv")))
     names(tsv) <- c("Lines","File")
     tsv$Library <- name
@@ -64,9 +65,9 @@ run_summary_plots <- function(run){
   # classify read fates
   all_reads$Type <- NA
   all_reads$Type[all_reads$Sample1==all_reads$Sample2] <- "proper"
-  all_reads$Type[all_reads$Sample1!=all_reads$Sample2 & all_reads$Sample1!="unknown" & all_reads$Sample2!="unknown"] <- "tagjump"
   all_reads$Type[all_reads$Sample1!=all_reads$Sample2 & all_reads$Sample1=="unknown"] <- "missingFWD"
   all_reads$Type[all_reads$Sample1!=all_reads$Sample2 & all_reads$Sample2=="unknown"] <- "missingREV"
+  all_reads$Type[all_reads$Sample1!=all_reads$Sample2 & all_reads$Sample1!="unknown" & all_reads$Sample2!="unknown"] <- "tagjump"
   all_reads$Type[all_reads$Sample2=="unknown" & all_reads$Sample1=="unknown"] <- "missingBOTH"
   all_reads$Type <- factor(all_reads$Type, levels=c("proper","tagjump","missingFWD","missingREV","missingBOTH"))
   
@@ -138,7 +139,7 @@ run_summary_plots <- function(run){
   ## run-level plots
   # tag jumping
   plot <- ggplot(all_reads)+
-    geom_tile(aes(x=Barcode1, y=Barcode2, fill=Lines))+
+    geom_tile(aes(x=Barcode1, y=Barcode2, fill=Lines+1))+
     scale_fill_viridis(option="turbo", trans="log10")+
     theme(axis.text=element_text(size=6),
           axis.text.x=element_text(angle=90), 

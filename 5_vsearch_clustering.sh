@@ -44,12 +44,10 @@ rm *temp -f
 
 # map OTUs within samples
 echo "MAPPING TO LIBRARIES..............."
-# run PER LIBRARY (otherwise will take forever)
+# write out commands to map OTUs within each library
+# run in parallel PER LIBRARY (otherwise will take forever)
 for fasta in `ls -1 ESFI*filt.fasta`; do
-	echo "            " $fasta
-	lib=${fasta%_filt.fasta}
-	vsearch --usearch_global ${fasta} --db ${RUN}_OTUs.fasta --id 0.97 --otutabout ${lib}_OTUs_mapped.txt
+	#echo "            " $fasta
+	lib="$(echo $fasta | sed 's/_filt.fasta//')"
+	echo "vsearch --usearch_global ${fasta} --db ${RUN}_OTUs.fasta --id 0.97 --otutabout ${lib}_OTUs_mapped.txt"
 done
-
-# merge across runs
-/local/cqls/R/R-4.4.2/Rscript ${SCRIPT_DIR}/merge_otutabs.R ${RUN}
